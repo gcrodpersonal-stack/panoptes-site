@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panoptes — AI trading that never sleeps</title>
+<meta name="description" content="ARGUS is an AI-powered autonomous trading system. Real-time decisions, plain-English reasoning, weekly self-improvement. Join the waitlist for 2027.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #08080b;
+  --bg-2: #0e0e14;
+  --bg-3: #14141c;
+  --surface: rgba(255,255,255,0.03);
+  --surface-hover: rgba(255,255,255,0.06);
+  --text: #f5f5f7;
+  --text-dim: #a1a1aa;
+  --text-mute: #71717a;
+  --border: rgba(255,255,255,0.06);
+  --border-2: rgba(255,255,255,0.12);
+  --accent: #d4b896;
+  --accent-2: #e6cfa8;
+  --gain: #4ade80;
+  --loss: #f87171;
+  --sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --mono: 'JetBrains Mono', ui-monospace, "SF Mono", Menlo, monospace;
+}
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  line-height: 1.55;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+body {
+  background:
+    radial-gradient(ellipse 800px 500px at 50% -100px, rgba(212,184,150,0.08), transparent 70%),
+    radial-gradient(ellipse 600px 400px at 20% 60%, rgba(212,184,150,0.03), transparent 70%),
+    var(--bg);
+  min-height: 100vh;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 2; }
+
+/* Panoptes Wordmark */
+.wordmark {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-style: italic;
+  color: var(--text);
+}
+.wordmark-eye {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin: 0 2px 4px 2px;
+  vertical-align: middle;
+  box-shadow: 0 0 20px rgba(212,184,150,0.4);
+}
+
+/* Nav */
+nav {
+  padding: 28px 0;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+nav .wordmark { font-size: 26px; }
+.nav-links { display: flex; gap: 32px; font-size: 14px; color: var(--text-dim); font-weight: 400; }
+.nav-links a { color: inherit; text-decoration: none; transition: color 0.2s; letter-spacing: 0.01em; }
+.nav-links a:hover { color: var(--text); }
+.nav-cta {
+  padding: 8px 16px; border: 1px solid var(--border-2); border-radius: 100px;
+  font-size: 13px; color: var(--text); text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+.nav-cta:hover { background: var(--surface); border-color: var(--accent); }
+
+/* Ticker Tape */
+.ticker-tape {
+  position: relative; overflow: hidden;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.4);
+  padding: 12px 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  z-index: 3;
+}
+.ticker-track {
+  display: flex;
+  gap: 48px;
+  white-space: nowrap;
+  animation: tick 60s linear infinite;
+  padding-left: 48px;
+  width: max-content;
+}
+.ticker-item { display: flex; align-items: center; gap: 8px; color: var(--text-dim); }
+.ticker-sym { color: var(--text); font-weight: 500; }
+.ticker-price { color: var(--text-dim); }
+.ticker-chg.up { color: var(--gain); }
+.ticker-chg.down { color: var(--loss); }
+.ticker-chg::before { content: ""; display: inline-block; width: 0; height: 0; margin-right: 3px; }
+.ticker-chg.up::before { border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid var(--gain); }
+.ticker-chg.down::before { border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--loss); }
+@keyframes tick {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.ticker-fade-left, .ticker-fade-right {
+  position: absolute; top: 0; bottom: 0; width: 80px; pointer-events: none; z-index: 4;
+}
+.ticker-fade-left { left: 0; background: linear-gradient(to right, var(--bg), transparent); }
+.ticker-fade-right { right: 0; background: linear-gradient(to left, var(--bg), transparent); }
+
+/* Hero */
+.hero { padding: 120px 0 100px; text-align: center; position: relative; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; margin-bottom: 40px;
+  background: var(--surface); border: 1px solid var(--border-2);
+  border-radius: 100px; font-size: 12px; color: var(--text-dim);
+  font-weight: 500; letter-spacing: 0.02em;
+}
+.hero-eyebrow .pulse {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--gain);
+  box-shadow: 0 0 0 0 rgba(74,222,128,0.7);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(74,222,128,0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
+  100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin-bottom: 32px;
+  color: var(--text);
+}
+h1 em {
+  font-style: italic;
+  color: var(--accent);
+  font-weight: 400;
+}
+.hero-lead {
+  font-family: var(--sans);
+  font-size: clamp(17px, 1.6vw, 20px);
+  color: var(--text-dim);
+  max-width: 620px; margin: 0 auto 48px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Waitlist Form */
+.waitlist {
+  max-width: 460px; margin: 0 auto;
+  display: flex; gap: 8px; padding: 6px;
+  background: var(--surface); border: 1px solid var(--border-2);
+  border-radius: 100px;
+  transition: border-color 0.2s;
+}
+.waitlist:focus-within { border-color: var(--accent); }
+.waitlist input {
+  flex: 1;
+  padding: 12px 20px; font-size: 15px;
+  background: transparent; border: none; color: var(--text);
+  font-family: var(--sans); outline: none;
+}
+.waitlist input::placeholder { color: var(--text-mute); }
+.waitlist button {
+  padding: 12px 24px; font-size: 14px; font-weight: 500;
+  background: var(--text); color: var(--bg); border: none;
+  border-radius: 100px; cursor: pointer;
+  transition: transform 0.15s, background 0.2s;
+  font-family: var(--sans); letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.waitlist button:hover { transform: translateY(-1px); background: var(--accent); }
+.form-hint {
+  font-size: 13px; color: var(--text-mute);
+  margin-top: 20px; font-family: var(--sans);
+}
+.form-success {
+  display: none; max-width: 460px; margin: 16px auto 0;
+  padding: 14px 20px;
+  background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.3);
+  border-radius: 100px; color: var(--gain); font-size: 14px;
+  text-align: center;
+}
+.form-success.visible { display: block; }
+
+/* Live Card */
+.live-card {
+  max-width: 640px; margin: 72px auto 0;
+  padding: 4px;
+  background: linear-gradient(135deg, var(--border-2), var(--border));
+  border-radius: 20px;
+  box-shadow: 0 40px 80px -20px rgba(0,0,0,0.6);
+}
+.live-card-inner {
+  background: var(--bg-2); border-radius: 17px; overflow: hidden;
+  font-family: var(--mono);
+}
+.live-card-head {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; color: var(--text-mute);
+}
+.live-card-dots { display: flex; gap: 6px; }
+.live-card-dots span {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+}
+.live-card-body { padding: 22px 24px; font-size: 13px; line-height: 1.9; text-align: left; }
+.live-card-body .prefix { color: var(--accent); }
+.live-card-body .dim { color: var(--text-mute); }
+.live-card-body .txt { color: var(--text); }
+.live-card-body .gain { color: var(--gain); }
+.live-card-body .neutral { color: var(--text-dim); }
+
+/* Sections */
+section { padding: 120px 0; border-top: 1px solid var(--border); }
+.section-eyebrow {
+  display: inline-block; margin-bottom: 16px;
+  font-family: var(--mono);
+  font-size: 11px; color: var(--accent); font-weight: 500;
+  letter-spacing: 0.15em; text-transform: uppercase;
+}
+h2 {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5vw, 56px); font-weight: 400;
+  line-height: 1.05; letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+h2 em { font-style: italic; color: var(--accent); font-weight: 400; }
+.section-lead {
+  font-size: 18px; color: var(--text-dim);
+  max-width: 720px; margin-bottom: 64px;
+  line-height: 1.6;
+}
+
+/* Stats */
+.stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+  padding: 40px 0;
+}
+.stat { border-left: 1px solid var(--border); padding: 8px 20px; }
+.stat:first-child { border-left: none; }
+.stat-num {
+  font-family: var(--serif);
+  font-size: 42px; font-weight: 400;
+  color: var(--accent); line-height: 1;
+  letter-spacing: -0.02em;
+}
+.stat-num em { font-style: italic; }
+.stat-label {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--text-mute);
+  margin-top: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+}
+@media (max-width: 720px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+  .stat { border-left: none; padding: 0; }
+}
+
+/* Steps */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.step {
+  padding: 28px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.step:hover { border-color: var(--border-2); background: var(--surface-hover); transform: translateY(-2px); }
+.step-num {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--accent);
+  letter-spacing: 0.15em; margin-bottom: 20px;
+}
+.step h4 {
+  font-family: var(--serif);
+  font-size: 24px; font-weight: 400; font-style: italic;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+.step p { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+@media (max-width: 900px) { .steps { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 500px) { .steps { grid-template-columns: 1fr; } }
+
+/* Features */
+.features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.feature {
+  padding: 32px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.feature:hover { border-color: var(--border-2); background: var(--surface-hover); }
+.feature-tag {
+  font-family: var(--mono);
+  font-size: 10px; color: var(--accent); letter-spacing: 0.2em;
+  text-transform: uppercase; margin-bottom: 16px;
+}
+.feature h3 {
+  font-family: var(--serif);
+  font-size: 22px; font-weight: 400; font-style: italic;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.feature p { font-size: 14.5px; color: var(--text-dim); line-height: 1.6; }
+@media (max-width: 900px) { .features { grid-template-columns: 1fr; } }
+
+/* Compare Table */
+.compare-wrap {
+  overflow-x: auto; border-radius: 16px;
+  border: 1px solid var(--border); background: var(--surface);
+}
+table.compare { width: 100%; border-collapse: collapse; font-size: 14px; }
+.compare th, .compare td {
+  padding: 18px 24px; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.compare th {
+  background: rgba(0,0,0,0.3);
+  font-family: var(--mono);
+  font-weight: 500; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.15em;
+  color: var(--text-mute);
+}
+.compare th:last-child { color: var(--accent); }
+.compare td:first-child { color: var(--text); font-weight: 500; }
+.compare td.yes { color: var(--gain); }
+.compare td.no { color: var(--loss); opacity: 0.85; }
+.compare td.argus-cell { color: var(--gain); font-weight: 600; background: rgba(74,222,128,0.04); }
+.compare tr:last-child td { border-bottom: none; }
+
+/* FAQ */
+.faq { display: grid; gap: 12px; }
+.faq-item {
+  padding: 24px 28px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.faq-item summary {
+  cursor: pointer;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400; font-size: 20px; letter-spacing: -0.01em;
+  list-style: none;
+  display: flex; justify-content: space-between; align-items: center; gap: 20px;
+  color: var(--text);
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: "+"; font-family: var(--sans);
+  font-size: 26px; color: var(--text-dim); font-weight: 300;
+  transition: transform 0.2s, color 0.2s;
+  line-height: 1;
+}
+.faq-item[open] summary::after { transform: rotate(45deg); color: var(--accent); }
+.faq-item p {
+  margin-top: 16px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 15px; color: var(--text-dim);
+  line-height: 1.7;
+}
+
+/* CTA */
+.cta-section { text-align: center; padding: 140px 0; }
+.cta-section h2 { margin: 0 auto 20px; max-width: 720px; }
+.cta-section .section-lead { margin: 0 auto 40px; }
+
+/* Footer */
+footer {
+  padding: 60px 0 40px;
+  border-top: 1px solid var(--border);
+  color: var(--text-mute);
+}
+.footer-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+.footer-brand .wordmark { font-size: 24px; margin-bottom: 12px; display: block; }
+.footer-brand p { font-size: 13px; color: var(--text-mute); max-width: 320px; line-height: 1.6; }
+.footer-col h5 {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--text-mute); letter-spacing: 0.15em;
+  text-transform: uppercase; margin-bottom: 16px; font-weight: 500;
+}
+.footer-col a {
+  display: block; margin-bottom: 10px;
+  font-size: 14px; color: var(--text-dim); text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-col a:hover { color: var(--text); }
+.footer-bottom {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
+  font-size: 12px; color: var(--text-mute);
+}
+.disclaimer {
+  max-width: 900px; margin: 24px auto 0;
+  font-size: 11px; line-height: 1.6;
+  color: var(--text-mute); text-align: center;
+}
+@media (max-width: 720px) {
+  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <nav>
+    <div class="wordmark">Pan<span class="wordmark-eye"></span>ptes</div>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#different">What's different</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a href="#waitlist" class="nav-cta">Join waitlist →</a>
+  </nav>
+</div>
+
+<!-- Ticker tape -->
+<div class="ticker-tape">
+  <div class="ticker-fade-left"></div>
+  <div class="ticker-fade-right"></div>
+  <div class="ticker-track" id="ticker"></div>
+</div>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero" id="waitlist">
+    <div class="hero-eyebrow">
+      <span class="pulse"></span>
+      <span>Live now · Day <span data-stat="day_number">--</span> of paper trading</span>
+    </div>
+
+    <h1>
+      AI trading<br>
+      that <em>never sleeps.</em>
+    </h1>
+
+    <p class="hero-lead">
+      ARGUS makes its own decisions in real time, explains every trade in plain English, and rewrites its own code every weekend. No copy-trading. No black boxes. No 45-day filing delays.
+    </p>
+
+    <form class="waitlist" action="https://formspree.io/f/mwvdwvbg" method="POST" onsubmit="handleSubmit(event, this)">
+      <input type="email" name="email" placeholder="your@email.com" required>
+      <input type="hidden" name="_subject" value="New Panoptes waitlist signup">
+      <input type="hidden" name="source" value="hero">
+      <button type="submit">Join waitlist</button>
+    </form>
+    <p class="form-hint">Founder pricing for the first 50 · No spam, ever</p>
+    <div class="form-success" id="form-success">
+      You're on the list. We'll reach out when beta opens in Q1 2027.
+    </div>
+
+    <!-- Live session card -->
+    <div class="live-card">
+      <div class="live-card-inner">
+        <div class="live-card-head">
+          <div class="live-card-dots"><span></span><span></span><span></span></div>
+          <span>argus · session #70 · live</span>
+        </div>
+        <div class="live-card-body">
+          <div><span class="dim">›</span> <span class="prefix">regime</span> <span class="txt">PULLBACK</span> <span class="dim">·</span> <span class="txt">kelly 10%</span> <span class="dim">·</span> <span class="txt">cash floor 30%</span></div>
+          <div><span class="dim">›</span> <span class="prefix">scan</span> <span class="txt">30 stocks</span> <span class="dim">→</span> <span class="txt">5 passed</span> <span class="dim">governance filters</span></div>
+          <div><span class="dim">›</span> <span class="prefix">news</span> <span class="txt">26 articles</span> <span class="dim">ingested for context</span></div>
+          <div><span class="dim">›</span> <span class="prefix">claude</span> <span class="txt">analyzing portfolio + sector rotation</span></div>
+          <div><span class="dim">›</span> <span class="prefix">decision</span> <span class="txt">HOLD ×6</span> <span class="gain">high confidence</span></div>
+          <div><span class="dim">›</span> <span class="prefix">tax lots</span> <span class="txt">recorded</span> <span class="dim">·</span> <span class="prefix">stops</span> <span class="txt">enforced</span></div>
+          <div><span class="dim">›</span> <span class="prefix">status</span> <span class="gain">all clear</span> <span class="dim">— digest sent</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-num"><span data-stat="win_rate">--</span><em>%</em></div>
+        <div class="stat-label">Live win rate</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">30<em>+</em></div>
+        <div class="stat-label">Scored trades</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">14</div>
+        <div class="stat-label">Problems solved</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">24/7</div>
+        <div class="stat-label">Autonomous ops</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <span class="section-eyebrow">The rhythm</span>
+    <h2>Four steps.<br>Every trading day.</h2>
+    <p class="section-lead">
+      ARGUS runs a full 24/7 operational loop on your behalf. You never write a rule. You never place a trade. You just read the emails.
+    </p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">STEP 01</div>
+        <h4>Scans</h4>
+        <p>30+ stocks screened three times daily against 9 tactical filters from legendary traders.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">STEP 02</div>
+        <h4>Decides</h4>
+        <p>Claude AI receives live data, regime, news, sectors — makes the buy or sell call in real time.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">STEP 03</div>
+        <h4>Executes</h4>
+        <p>Orders placed automatically through your brokerage. Stops, sizing, cash floor enforced.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">STEP 04</div>
+        <h4>Learns</h4>
+        <p>Every weekend the self-improve engine reads its own performance and rewrites its own code.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIFFERENT -->
+  <section id="different">
+    <span class="section-eyebrow">Six things no one else does</span>
+    <h2>Different <em>by design.</em></h2>
+    <p class="section-lead">
+      Copy-trading platforms mirror stale disclosed trades. Rule-based bots follow rules you set once and never update. ARGUS is a third category.
+    </p>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-tag">01 · Speed</div>
+        <h3>Real-time decisions</h3>
+        <p>Zero decision lag. No 45-day filing delays. Every call made against live market data.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-tag">02 · Adaptive</div>
+        <h3>Regime-aware sizing</h3>
+        <p>Kelly, cash floor, and day-trading behavior all adapt automatically to BULL, PULLBACK, or BEAR.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-tag">03 · Compounding</div>
+        <h3>Self-improving weekly</h3>
+        <p>Every Saturday night ARGUS analyzes its own performance and patches its own source code.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-tag">04 · Transparent</div>
+        <h3>Plain-English reasoning</h3>
+        <p>Every buy, sell, or hold arrives with a full email explaining exactly why. Trust through transparency.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-tag">05 · Aware</div>
+        <h3>Earnings-aware exits</h3>
+        <p>Positions flagged 14 days before earnings and systematically de-risked. No blind binary bets.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-tag">06 · Intelligent</div>
+        <h3>Tax intelligence built in</h3>
+        <p>Every trade logs a tax lot with cost basis, hold days, and gain/loss. Wash-sale detection ready.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section>
+    <span class="section-eyebrow">The category comparison</span>
+    <h2>Why the alternatives <em>fall short.</em></h2>
+    <p class="section-lead">
+      The two dominant categories in retail automated trading both have structural weaknesses ARGUS was built to solve.
+    </p>
+    <div class="compare-wrap">
+      <table class="compare">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Copy-trading</th>
+            <th>Rule-based bots</th>
+            <th>Panoptes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Real-time decisions</td><td class="no">45-day lag</td><td class="yes">Yes</td><td class="argus-cell">Yes</td></tr>
+          <tr><td>Adaptive to market regime</td><td class="no">No</td><td class="no">No</td><td class="argus-cell">Automatic</td></tr>
+          <tr><td>Explains every decision</td><td class="no">No</td><td class="no">Partial</td><td class="argus-cell">Every trade</td></tr>
+          <tr><td>Self-improves over time</td><td class="no">No</td><td class="no">No</td><td class="argus-cell">Weekly</td></tr>
+          <tr><td>Tax lot tracking</td><td class="no">No</td><td class="no">No</td><td class="argus-cell">Built-in</td></tr>
+          <tr><td>Slippage measurement</td><td class="no">No</td><td class="no">No</td><td class="argus-cell">Every order</td></tr>
+          <tr><td>Fee stacking on small accounts</td><td class="no">Up to 6%</td><td class="no">Common</td><td class="argus-cell">Flat sub</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <span class="section-eyebrow">Answers</span>
+    <h2>The <em>honest</em> questions.</h2>
+    <p class="section-lead">
+      Everything you'd want to ask before handing an autonomous system access to your brokerage account.
+    </p>
+    <div class="faq">
+      <details class="faq-item">
+        <summary>When can I actually use ARGUS?</summary>
+        <p>Beta opens Q1 2027 to the first 50 waitlist members at founder pricing. Full public launch is scheduled for Q3 2027 after a 6-month audited live track record is published.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Does ARGUS trade my real money?</summary>
+        <p>Yes. You connect your own brokerage account (Alpaca at launch; Schwab and Fidelity later in 2027). ARGUS places trades in your account under your credentials. You retain full ownership and can withdraw or override at any time.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What's the current track record?</summary>
+        <p>ARGUS has been running in live paper trading since June 15, 2026. Current win rate is <span data-stat="win_rate">--</span>% across <span data-stat="total_trades">--</span> completed round-trip trades. All performance data is logged and will be published in an audited 6-month report before beta opens.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How is this different from Autopilot or 3Commas?</summary>
+        <p>Autopilot copies disclosed trades that are up to 45 days stale. 3Commas follows static rules you set once. ARGUS makes its own decisions in real time using live data, adapts to market regime automatically, and rewrites its own code every weekend. It's a third category — not a variant of the other two.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Who's building this?</summary>
+        <p>ARGUS is built by Panoptes Labs, an independent team based in Miami. Every line of code is written and maintained in-house. Full technical transparency will be a permanent policy.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What will pricing look like?</summary>
+        <p>Standard tier is $149/month for accounts under $250k. Premium tier is $499/month for larger accounts with priority support and options access. First 50 beta members lock in $49/month founder pricing for life.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <span class="section-eyebrow">Get in early</span>
+    <h2>Join the <em>first fifty.</em></h2>
+    <p class="section-lead">
+      Founder pricing at $49/month for life. Direct feedback line to the team. First access when beta opens Q1 2027.
+    </p>
+    <form class="waitlist" action="https://formspree.io/f/mwvdwvbg" method="POST" onsubmit="handleSubmit(event, this)">
+      <input type="email" name="email" placeholder="your@email.com" required>
+      <input type="hidden" name="_subject" value="New Panoptes waitlist signup">
+      <input type="hidden" name="source" value="cta-bottom">
+      <button type="submit">Reserve my spot</button>
+    </form>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="wordmark">Pan<span class="wordmark-eye"></span>ptes</span>
+        <p>Autonomous AI trading, built in Miami. Named after the hundred-eyed giant of Greek myth who never slept.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="#how">How it works</a>
+        <a href="#different">What's different</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <a href="mailto:hello@panoptes.trade">Contact</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Panoptes Labs · Built in Miami</div>
+      <div>Powered by Claude AI</div>
+    </div>
+    <p class="disclaimer">
+      ARGUS is an automated trading tool. Past performance in paper trading does not guarantee future results.
+      Panoptes Labs is not a registered investment adviser and does not provide investment advice. Trading involves risk of loss.
+      Users are responsible for their own investment decisions and should consult a licensed financial adviser before trading.
+    </p>
+  </footer>
+
+</div>
+
+<script>
+const tickerSymbols = [
+  { sym: "SPY",   px: "740.89",  chg: "+1.58%", dir: "up" },
+  { sym: "QQQ",   px: "723.09",  chg: "+2.48%", dir: "up" },
+  { sym: "NVDA",  px: "194.92",  chg: "+1.54%", dir: "up" },
+  { sym: "AAPL",  px: "281.40",  chg: "+0.03%", dir: "up" },
+  { sym: "MSFT",  px: "369.03",  chg: "-0.71%", dir: "down" },
+  { sym: "GOOGL", px: "353.49",  chg: "+5.27%", dir: "up" },
+  { sym: "AMZN",  px: "240.12",  chg: "+4.13%", dir: "up" },
+  { sym: "META",  px: "562.37",  chg: "+2.26%", dir: "up" },
+  { sym: "TSLA",  px: "411.00",  chg: "+8.44%", dir: "up" },
+  { sym: "AMD",   px: "537.50",  chg: "+3.33%", dir: "up" },
+  { sym: "JPM",   px: "329.44",  chg: "+0.59%", dir: "up" },
+  { sym: "BAC",   px: "58.35",   chg: "+2.23%", dir: "up" },
+  { sym: "JNJ",   px: "253.98",  chg: "+0.08%", dir: "up" },
+  { sym: "LLY",   px: "1199.43", chg: "-1.98%", dir: "down" },
+  { sym: "UNH",   px: "427.00",  chg: "+0.70%", dir: "up" },
+  { sym: "COIN",  px: "151.68",  chg: "+1.66%", dir: "up" },
+  { sym: "PLTR",  px: "115.75",  chg: "+2.60%", dir: "up" },
+  { sym: "SMCI",  px: "28.15",   chg: "-8.11%", dir: "down" },
+  { sym: "ARM",   px: "343.96",  chg: "+2.82%", dir: "up" },
+  { sym: "V",     px: "341.65",  chg: "+1.85%", dir: "up" },
+];
+
+function buildTicker() {
+  const track = document.getElementById("ticker");
+  const html = tickerSymbols.map(t =>
+    `<div class="ticker-item">
+       <span class="ticker-sym">${t.sym}</span>
+       <span class="ticker-price">${t.px}</span>
+       <span class="ticker-chg ${t.dir}">${t.chg}</span>
+     </div>`
+  ).join("");
+  track.innerHTML = html + html;
+}
+buildTicker();
+
+function handleSubmit(e, formEl) {
+  e.preventDefault();
+  const form = formEl || e.target;
+  const email = form.querySelector('input[type=email]').value;
+  const success = document.getElementById('form-success');
+
+  // Post to Formspree via fetch so we stay on the page (no redirect)
+  fetch(form.action, {
+    method: 'POST',
+    body: new FormData(form),
+    headers: { 'Accept': 'application/json' }
+  })
+  .then(res => {
+    if (res.ok) {
+      success.classList.add('visible');
+      form.reset();
+      try {
+        const existing = JSON.parse(localStorage.getItem('panoptes_waitlist') || '[]');
+        if (!existing.includes(email)) existing.push(email);
+        localStorage.setItem('panoptes_waitlist', JSON.stringify(existing));
+      } catch (_) {}
+      setTimeout(() => success.classList.remove('visible'), 6000);
+      success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      alert('Something went wrong. Please try again in a moment.');
+    }
+  })
+  .catch(() => {
+    alert('Network error. Please check your connection and try again.');
+  });
+}
+</script>
+
+<script>
+// Fetch live stats from public_stats.json and update page
+(async function loadStats() {
+  try {
+    const res = await fetch('/public_stats.json?t=' + Date.now());
+    if (!res.ok) return;
+    const stats = await res.json();
+    document.querySelectorAll('[data-stat]').forEach(el => {
+      const key = el.getAttribute('data-stat');
+      if (stats[key] !== undefined) el.textContent = stats[key];
+    });
+  } catch (e) {
+    console.log('Stats not available:', e.message);
+  }
+})();
+</script>
+</body>
+</html>
